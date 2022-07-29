@@ -1,3 +1,8 @@
+# build rubbish 
+build/
+bin/
+.vscode/
+
 # Prerequisites
 *.d
 
@@ -30,3 +35,4 @@
 *.exe
 *.out
 *.app
+
