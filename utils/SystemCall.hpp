@@ -19,4 +19,5 @@
 
 pid_t GetThreadId();
 std::thread::id CppGetThreadId();
+
 #endif

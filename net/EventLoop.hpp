@@ -25,7 +25,7 @@
 #include <thread>
 #include <vector>
 
-class EventLoop {
+class EventLoop : public std::enable_shared_from_this<EventLoop> {
 private:
   bool running_;
   std::unique_ptr<Epoller> poller_;

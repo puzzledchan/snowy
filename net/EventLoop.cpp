@@ -69,7 +69,6 @@ bool EventLoop::Listen(const char *ip, uint16_t hostPort,
 bool EventLoop::Listen(const SocketAddr &listenAddr,
                        NewAcceptionCallback newAccCallback) {
   auto s = std::make_shared<Acceptor>(this); // 进程绑定
-  s->SetNewAcceptionCallback(std::move(newAccCallback));
   if (!s->BindAddr(listenAddr))
     return false;
 

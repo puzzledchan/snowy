@@ -21,14 +21,16 @@ class EventLoop;
 class Poller;
 class Acceptor : public Channel {
 private:
-  EventLoop *const loop_; // which loop belong to
-
+  using EventLoopPool = std::vector<std::shared_ptr<EventLoop>>;
+  using EventLoopPoolPtr = std::shared_ptr<EventLoopPool>;
+  using EventLoopPtr = std::shared_ptr<EventLoop>;
+  EventLoopPtr const loop_;     // which loop belong to
+  EventLoopPoolPtr const pool_; // the reactor pool
+  int accfd_;
   sockaddr_in peer_;
-  int localSock_;
-  uint16_t localPort_;
 
 public:
-  explicit Acceptor(EventLoop *loop);
+  explicit Acceptor(EventLoopPtr loop, EventLoopPoolPtr pool = nullptr);
   ~Acceptor();
   Acceptor(const Acceptor &) = delete;
   void operator=(const Acceptor &) = delete;
@@ -38,13 +40,10 @@ public:
   void HandleErrorEvent() override;
 
 public:
-  void SetNewAcceptionCallback(NewAcceptionCallback cb);
   bool BindAddr(const SocketAddr &addr);
 
 private:
   int _Accept();
-  NewAcceptionCallback newAccCallback_;
-  static const int kListenQueue;
 };
 
 #endif // Connected
