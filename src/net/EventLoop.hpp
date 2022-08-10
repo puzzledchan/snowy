@@ -1,12 +1,12 @@
 /**
  * @file EventLoop.hpp
  * @author JDongChen
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2022-08-06
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #ifndef SNOWY_EVENTLOOP_H
@@ -16,9 +16,9 @@
 #include "Poller.hpp"
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <thread>
-#include <memory>
 
 #include <chrono>
 #include <functional>
@@ -29,10 +29,11 @@
 class EventLoop : public std::enable_shared_from_this<EventLoop> {
 private:
   bool running_;
-  std::unique_ptr<Epoller> poller_;
+  std::unique_ptr<Poller> poller_;
+  int id_;
 
 public:
-  EventLoop();
+  EventLoop(int id);
   ~EventLoop();
   EventLoop(const EventLoop &) = delete;
   void operator=(const EventLoop &) = delete;

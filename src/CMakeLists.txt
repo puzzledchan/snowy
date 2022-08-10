@@ -12,7 +12,13 @@ aux_source_directory(net source)
 target_sources(server PUBLIC ${source})
 
 target_include_directories(server
-    PUBLIC ${CMAKE_PROJECT_DIR}/net ${CMAKE_PROJECT_DIR}/http
+    PUBLIC ${PROJECT_SOURCE_DIR}/utils/sysapi
 )
+target_link_directories(server
+    PUBLIC ${PROJECT_SOURCE_DIR}/net
+)
+message(STATUS "PROJECT_BINARY_DIR: ${PROJECT_BINARY_DIR}")
+message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+message(STATUS "CMAKE_PROJECT_DIR: ${CMAKE_PROJECT_DIR}")
 
 target_link_libraries(server PUBLIC Threads::Threads)
