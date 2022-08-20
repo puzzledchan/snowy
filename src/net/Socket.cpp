@@ -1,7 +1,8 @@
-#include <cassert>
-#include <fcntl.h>
+#include "Socket.hpp"
 
-void SetNonBlock(int sock, bool nonblock = true) {
+int CreateTCPSocket() { return ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); }
+
+void SetNonBlock(int sock, bool nonblock) {
   int flag = ::fcntl(sock, F_GETFL, 0);
   assert(flag >= 0 && "Non Block failed");
 

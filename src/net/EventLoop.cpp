@@ -5,16 +5,13 @@
 
 static thread_local EventLoop *g_thisLoop = nullptr;
 
-EventLoop::EventLoop(int id) : poller_(new Epoller) {
+EventLoop::EventLoop() : poller_(new Epoller) {
   assert(!g_thisLoop && "There must be only one EventLoop per thread");
   g_thisLoop = this;
   running_ = true;
-  id_ = id;
-  printf("EventLoop is %d", id);
-
-  // todo notify_all
+  notifier_ = std::make_shared<PipeChannel>();
 }
-EventLoop::~EventLoop() { printf("EventLoop released %d", id_); }
+EventLoop::~EventLoop() {}
 bool EventLoop::IsRunningThisLoop() const { return this == g_thisLoop; }
 void EventLoop::RunInThisLoop(Functor cb) {
   if (IsRunningThisLoop()) {
@@ -30,7 +27,7 @@ void EventLoop::_QueueInThisLoop(Functor cb) {
     pendingFunctors_.emplace_back(std::move(cb));
   }
   if (!IsRunningThisLoop() || callingPendingFunctors_) {
-    // _WakeUp();
+    notifier_->Notify();
   }
 }
 
@@ -51,7 +48,8 @@ void EventLoop::Unregister(int events, std::shared_ptr<Channel> src) {
 }
 
 void EventLoop::Run() {
-  const std::chrono::milliseconds defaultPollTime(100);
+  const std::chrono::milliseconds defaultPollTime(10);
+  Register(EPOLL_ET_Read, notifier_);
   while (running_) {
     _Loop(defaultPollTime);
   }
@@ -75,12 +73,9 @@ bool EventLoop::_Loop(std::chrono::milliseconds timeout) {
   }
   const auto &fired = poller_->GetFiredEvents();
   for (int i = 0; i < ready; ++i) {
-    printf("==========================\n");
     assert(fired[i].userdata != nullptr);
-    auto src = (Channel *)(fired[i].userdata);
-    printf("Identifier:%d======================\n", fired[i].events);
+    auto src = static_cast<Channel *>(fired[i].userdata);
     if (fired[i].events & EPOLL_ET_Read) {
-      printf("EPOLL_ET_Read\n");
       if (!src->HandleReadEvent()) {
         src->HandleErrorEvent();
       }

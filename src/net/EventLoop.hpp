@@ -13,6 +13,7 @@
 #define SNOWY_EVENTLOOP_H
 
 #include "Channel.hpp"
+#include "PipeChannel.hpp"
 #include "Poller.hpp"
 
 #include <atomic>
@@ -30,10 +31,9 @@ class EventLoop : public std::enable_shared_from_this<EventLoop> {
 private:
   bool running_;
   std::unique_ptr<Poller> poller_;
-  int id_;
 
 public:
-  EventLoop(int id);
+  EventLoop();
   ~EventLoop();
   EventLoop(const EventLoop &) = delete;
   void operator=(const EventLoop &) = delete;
@@ -63,6 +63,7 @@ private:
   std::atomic<bool> callingPendingFunctors_; /* atomic */
   std::mutex funcMutex_;
   int wakeupFd_; // just for help wakeup
+  std::shared_ptr<PipeChannel> notifier_;
 
   ChannelList activeChannels_; // activeChannels_ process
   ChannelSet channelSet_;

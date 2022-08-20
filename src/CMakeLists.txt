@@ -1,24 +1,32 @@
-cmake_minimum_required(VERSION 3.10)
+message(STATUS "Generating CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR} ")
+set(LIB_SRC
+    log/Logger.cpp
+    utils/ByteArray.cpp
+    utils/Buffer.cpp
 
-# Set the project name
-project(snowy)
+    net/Acceptor.cpp
+    net/Connection.cpp
+    net/Epoller.cpp
+    net/EventLoop.cpp
+    net/TcpServer.cpp
+    net/Socket.cpp
+
+    rpc/RpcClient.cpp
+    rpc/RpcServer.cpp
+    rpc/RpcSession.cpp
+)
+
+set(Header
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/log
+    ${CMAKE_CURRENT_SOURCE_DIR}/rpc
+    ${CMAKE_CURRENT_SOURCE_DIR}/net
+)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+set(LIB_LIB Threads::Threads)
 
-add_executable(server main.cpp)
-aux_source_directory(http source)
-aux_source_directory(net source)
-target_sources(server PUBLIC ${source})
-
-target_include_directories(server
-    PUBLIC ${PROJECT_SOURCE_DIR}/utils/sysapi
-)
-target_link_directories(server
-    PUBLIC ${PROJECT_SOURCE_DIR}/net
-)
-message(STATUS "PROJECT_BINARY_DIR: ${PROJECT_BINARY_DIR}")
-message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-message(STATUS "CMAKE_PROJECT_DIR: ${CMAKE_PROJECT_DIR}")
-
-target_link_libraries(server PUBLIC Threads::Threads)
+add_library(snowy SHARED ${LIB_SRC})
+target_link_libraries(snowy PUBLIC ${LIB_LIB})
+target_include_directories(snowy PUBLIC ${Header})

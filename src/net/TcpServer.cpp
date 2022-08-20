@@ -1,9 +1,10 @@
+#include <arpa/inet.h>
 #include <condition_variable>
 
 #include "TcpServer.hpp"
 
 TcpServer::TcpServer() {
-  loop_.reset(new EventLoop(1));
+  loop_.reset(new EventLoop());
   thread_pool_.clear();
 }
 TcpServer::~TcpServer() {
@@ -17,20 +18,19 @@ TcpServer::~TcpServer() {
 
 void TcpServer::Listen() {
   auto func = [this]() {
-    printf("loops_.size() = %d\n", loops_.size());
-    auto acc = std::make_shared<Acceptor>(loop_, loops_);
+    auto acc = std::make_shared<Acceptor>(loop_);
+    auto newConnFunc = std::bind(&TcpServer::makeNewConnection, this,
+                                 std::placeholders::_1, std::placeholders::_2);
+    acc->setMakeNewConnection(newConnFunc);
     acc->BindAndListen();
-    printf("pointer:%p=====start==============\n", acc.get());
-    printf("pointer:%p=====start==============\n", acc->Identifier());
     loop_->Register(EPOLL_ET_Read, acc);
-    printf("Register Listening...\n");
   };
 
   loop_->RunInThisLoop(func);
 }
 
-void TcpServer::Run() {
-  //_StartWorkers();
+void TcpServer::Start() {
+  _StartWorkers();
   printf("start workers...\n");
   Listen();
   loop_->Run();
@@ -46,10 +46,10 @@ void TcpServer::Run() {
 void TcpServer::_StartWorkers() {
   std::mutex pool_mutex;
   std::condition_variable cond;
-  int numLoop = 8;
+  std::size_t numLoop = 8;
   for (size_t i = 0; i < numLoop; ++i) {
     auto func = [this, &pool_mutex, &cond, numLoop]() {
-      auto loop = std::make_shared<EventLoop>(2);
+      auto loop = std::make_shared<EventLoop>();
       {
         std::unique_lock<std::mutex> guard(pool_mutex);
         loops_.push_back(loop);
@@ -63,4 +63,22 @@ void TcpServer::_StartWorkers() {
 
   std::unique_lock<std::mutex> guard(pool_mutex);
   cond.wait(guard, [this, numLoop]() { return loops_.size() == numLoop; });
+}
+
+std::shared_ptr<EventLoop> TcpServer::_getNextLoop() {
+  printf("next loop_index: %ld\n", loops_.size());
+  return loops_[next_loop_ind_++ % loops_.size()];
+  ;
+}
+
+void TcpServer::makeNewConnection(int connfd, const sockaddr_in &peer) {
+  // auto server = this;
+  // auto loop = server->_getNextLoop();
+  auto loop = _getNextLoop();
+  auto func = [loop, connfd, peer]() {
+    auto conn(std::make_shared<Connection>(loop));
+    conn->Init(connfd, peer);
+    loop->Register(EPOLL_ET_Read, conn);
+  };
+  loop->RunInThisLoop(func);
 }

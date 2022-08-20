@@ -1,29 +1,28 @@
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/test)
 
-# set_target_properties(threadpool PROPERTIES LINKER_LANGUAGE CXX)
-#[[
-add_executable(threadpool ${CMAKE_CURRENT_SOURCE_DIR}/concurrency/test.cpp)
-target_include_directories(threadpool
-    PUBLIC ${PROJECT_SOURCE_DIR}/concurrency
-)
-target_link_libraries(threadpool PUBLIC Threads::Threads)
+set(LIBS snowy)
 
-add_executable(singleton ${CMAKE_CURRENT_SOURCE_DIR}/utils/test_singleton.cpp)
-target_include_directories(singleton
-    PUBLIC ${PROJECT_SOURCE_DIR}/utils
-)
+set(TESTS_RPC_FILES "")
+aux_source_directory("${CMAKE_SOURCE_DIR}/tests/rpc" TESTS_RPC_FILES)
 
-add_executable(log ${CMAKE_CURRENT_SOURCE_DIR}/test_log/log_test.cpp ${PROJECT_SOURCE_DIR}/logger/log.cpp
-    ${PROJECT_SOURCE_DIR}/utils/Timer.cpp ${PROJECT_SOURCE_DIR}/utils/Buffer.cpp)
-target_include_directories(log
-    PUBLIC ${PROJECT_SOURCE_DIR}/logger ${PROJECT_SOURCE_DIR}/utils
-)
-target_link_libraries(log PUBLIC Threads::Threads)
-]]
-add_executable(log ${CMAKE_CURRENT_SOURCE_DIR}/test_log/logger_test.cpp ${PROJECT_SOURCE_DIR}/logger/Logger.cpp
-    ${PROJECT_SOURCE_DIR}/utils/SystemCall.cpp)
-target_include_directories(log
-    PUBLIC ${PROJECT_SOURCE_DIR}/logger ${PROJECT_SOURCE_DIR}/utils
-)
-target_link_libraries(log PUBLIC Threads::Threads)
+foreach(TESTS_RPC_FILE_PATH ${TESTS_RPC_FILES})
+    string(REGEX REPLACE ".+[/\]([^/\.]+)\\.cpp" "\\1" TESTS_RPC_FILE_NAME ${TESTS_RPC_FILE_PATH})
+    message(STATUS "Generating test target: ${TESTS_RPC_FILE_NAME} ")
+    snowy_add_executable(${TESTS_RPC_FILE_NAME} rpc/${TESTS_RPC_FILE_NAME}.cpp snowy ${LIBS})
+endforeach(TESTS_RPC_FILE_PATH)
+
+aux_source_directory("${CMAKE_SOURCE_DIR}/tests/net" TESTS_NET_FILE_PATH)
+
+foreach(TESTS_NET_FILE_PATH ${TESTS_NET_FILE_PATH})
+    string(REGEX REPLACE ".+[/\]([^/\.]+)\\.cpp" "\\1" TESTS_NET_FILE_PATH ${TESTS_NET_FILE_PATH})
+    message(STATUS "Generating test target: ${TESTS_NET_FILE_PATH} ")
+    snowy_add_executable(${TESTS_NET_FILE_PATH} net/${TESTS_NET_FILE_PATH}.cpp snowy ${LIBS})
+endforeach(TESTS_NET_FILE_PATH)
+
+aux_source_directory("${CMAKE_SOURCE_DIR}/tests/utils" TESTS_UTILS_FILE_PATH)
+
+foreach(TESTS_UTILS_FILE_PATH ${TESTS_UTILS_FILE_PATH})
+    string(REGEX REPLACE ".+[/\]([^/\.]+)\\.cpp" "\\1" TESTS_UTILS_FILE_PATH ${TESTS_UTILS_FILE_PATH})
+    message(STATUS "Generating test target: ${TESTS_UTILS_FILE_PATH} ")
+    snowy_add_executable(${TESTS_UTILS_FILE_PATH} utils/${TESTS_UTILS_FILE_PATH}.cpp snowy ${LIBS})
+endforeach(TESTS_UTILS_FILE_PATH)

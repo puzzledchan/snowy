@@ -11,6 +11,7 @@
 #ifndef SNOWY_CHANNEL_H
 #define SNOWY_CHANNEL_H
 
+#include "Socket.hpp"
 #include <memory>
 #include <stdio.h>
 

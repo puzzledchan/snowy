@@ -77,7 +77,7 @@
   SNOWY_LOG_FMT_LEVEL(logger, LogLevel::FATAL, fmt, __VA_ARGS__)
 
 //通过单例LoggerMgr--->访问到LogManager中默认的Logger实例化对象
-#define SNOWY_LOG_ROOT LogMgr::GetInstance()->getRoot()
+#define SNOWY_LOG_ROOT() LogMgr::GetInstance()->getRoot()
 
 //通过日志器的名字获取日志器实体
 #define SNOWY_LOG_NAME(name) LogMgr::GetInstance()->getLogger(name)
