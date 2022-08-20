@@ -34,9 +34,9 @@ enum PollEvent {
 
 class Poller {
 public:
-  Poller() : multiplexer_(-1) { printf("create poll\n"); }
+  Poller() : multiplexer_(-1) {}
 
-  virtual ~Poller() { printf("delete poll\n"); }
+  virtual ~Poller() {}
 
   virtual bool Register(int fd, int events, void *userPtr) = 0;
   virtual bool Modify(int fd, int events, void *userPtr) = 0;

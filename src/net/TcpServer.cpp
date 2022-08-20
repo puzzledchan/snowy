@@ -66,9 +66,7 @@ void TcpServer::_StartWorkers() {
 }
 
 std::shared_ptr<EventLoop> TcpServer::_getNextLoop() {
-  printf("next loop_index: %ld\n", loops_.size());
   return loops_[next_loop_ind_++ % loops_.size()];
-  ;
 }
 
 void TcpServer::makeNewConnection(int connfd, const sockaddr_in &peer) {

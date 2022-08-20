@@ -8,7 +8,7 @@ Epoller::Epoller() {
 
 Epoller::~Epoller() {
   if (multiplexer_ != -1) {
-    printf("close epoll: %d\n", multiplexer_);
+    printf("close Epoller: %d\n", multiplexer_);
     ::close(multiplexer_);
   };
 }
