@@ -35,7 +35,6 @@ enum PollEvent {
 class Poller {
 public:
   Poller() : multiplexer_(-1) {}
-
   virtual ~Poller() {}
 
   virtual bool Register(int fd, int events, void *userPtr) = 0;
